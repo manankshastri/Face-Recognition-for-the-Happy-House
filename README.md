@@ -8,7 +8,7 @@ Face recognition problems commonly fall into two categories:
 
 FaceNet learns a neural network that encodes a face image into a vector of 128 numbers. By comparing two such vectors, you can then determine if two pictures are of the same person.
 
-**In this assignment, you will:**
+**In this project, we will:**
 - Implement the triplet loss function
 - Use a pretrained model to map face images into 128-dimensional encodings
 - Use these encodings to perform face verification and face recognition 
