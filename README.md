@@ -106,14 +106,16 @@ To reduce such shenanigans, we'd like to change our face verification system to 
 We'll implement a face recognition system that takes as input an image, and figures out if it is one of the authorized persons (and if so, who). Unlike the previous face verification system, we will no longer get a person's name as another input. 
 
 ***
-## Future Implementation:
+## Future Implementations:
 - Put more images of each person (under different lighting conditions, taken on different days, etc.) into the database. Then given a new image, compare the new face to multiple pictures of the person. This would increase accuracy.
 - Crop the images to just contain the face, and less of the "border" region around the face. This preprocessing removes some of the irrelevant pixels around the face, and also makes the algorithm more robust.
+***
 ***
 **What we should remember**:
 - Face verification solves an easier 1:1 matching problem; face recognition addresses a harder 1:K matching problem. 
 - The triplet loss is an effective loss function for training a neural network to learn an encoding of a face image.
 - The same encoding can be used for verification and recognition. Measuring distances between two images' encodings allows you to determine whether they are pictures of the same person. 
+***
 ***
 ### References:
 
