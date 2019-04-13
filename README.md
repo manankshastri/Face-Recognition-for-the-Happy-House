@@ -70,21 +70,54 @@ Training will use triplets of images **(A, P, N)**:
 - P is a "Positive" image--a picture of the same person as the Anchor image.
 - N is a "Negative" image--a picture of a different person than the Anchor image.
 
-These triplets are picked from our training dataset. We will write **(A^{(i)}, P^{(i)}, N^{(i)})** to denote the **i**-th training example. 
+<img src="images/Capture.PNG" style="width:280px;height:150px;">
 
-You'd like to make sure that an image **A^{(i)}** of an individual is closer to the Positive **P^{(i)}** than to the Negative image **N^{(i)}**) by at least a margin **\alpha**:
+## 2 - Loading the trained model
 
-$$\mid \mid f(A^{(i)}) - f(P^{(i)}) \mid \mid_2^2 + \alpha < \mid \mid f(A^{(i)}) - f(N^{(i)}) \mid \mid_2^2$$
+FaceNet is trained by minimizing the triplet loss. But since training requires a lot of data and a lot of computation, we won't train it from scratch here. Instead, we load a previously trained model.
 
-You would thus like to minimize the following "triplet cost":
+Here're some examples of distances between the encodings between three individuals:
 
-$$\mathcal{J} = \sum^{m}_{i=1} \large[ \small \underbrace{\mid \mid f(A^{(i)}) - f(P^{(i)}) \mid \mid_2^2}_\text{(1)} - \underbrace{\mid \mid f(A^{(i)}) - f(N^{(i)}) \mid \mid_2^2}_\text{(2)} + \alpha \large ] \small_+ \tag{3}$$
+<img src="images/distance_matrix.png" style="width:380px;height:200px;">
+<br>
+<p align='center'><strong>Example of distance outputs between three individuals' encodings</strong></p>
 
-Here, we are using the notation "$[z]_+$" to denote $max(z,0)$.  
+## 3 - Applying the model
 
-Notes:
-- The term (1) is the squared distance between the anchor "A" and the positive "P" for a given triplet; you want this to be small. 
-- The term (2) is the squared distance between the anchor "A" and the negative "N" for a given triplet, you want this to be relatively large, so it thus makes sense to have a minus sign preceding it. 
-- $\alpha$ is called the margin. It is a hyperparameter that you should pick manually. We will use $\alpha = 0.2$. 
+Back to the Happy House! Residents are living blissfully since we implemented happiness recognition for the house in an earlier assignment.  
 
-Most implementations also normalize the encoding vectors  to have norm equal one (i.e., $\mid \mid f(img)\mid \mid_2$=1); you won't have to worry about that here.
+However, several issues keep coming up: The Happy House became so happy that every happy person in the neighborhood is coming to hang out in your living room. It is getting really crowded, which is having a negative impact on the residents of the house. All these random happy people are also eating all your food. 
+
+So, we decide to change the door entry policy, and not just let random happy people enter anymore, even if they are happy! Instead, we'd like to build a **Face verification** system so as to only let people from a specified list come in. To get admitted, each person has to swipe an ID card (identification card) to identify themselves at the door. The face recognition system then checks that they are who they claim to be. 
+
+### 3.1 - Face Verification
+
+Let's build a database containing one encoding vector for each person allowed to enter the happy house. To generate the encoding we use `img_to_encoding(image_path, model)` which basically runs the forward propagation of the model on the specified image.
+This database maps each person's name to a 128-dimensional encoding of their face.
+
+Now, when someone shows up at your front door and swipes their ID card (thus giving you their name), you can look up their encoding in the database, and use it to check if the person standing at the front door matches the name on the ID.
+
+### 3.2 - Face Recognition
+
+Our face verification system is mostly working well. But since Kian got his ID card stolen, when he came back to the house that evening he couldn't get in! 
+
+To reduce such shenanigans, we'd like to change our face verification system to a face recognition system. This way, no one has to carry an ID card anymore. An authorized person can just walk up to the house, and the front door will unlock for them! 
+
+We'll implement a face recognition system that takes as input an image, and figures out if it is one of the authorized persons (and if so, who). Unlike the previous face verification system, we will no longer get a person's name as another input. 
+
+***
+## Future Implementation:
+- Put more images of each person (under different lighting conditions, taken on different days, etc.) into the database. Then given a new image, compare the new face to multiple pictures of the person. This would increase accuracy.
+- Crop the images to just contain the face, and less of the "border" region around the face. This preprocessing removes some of the irrelevant pixels around the face, and also makes the algorithm more robust.
+***
+**What we should remember**:
+- Face verification solves an easier 1:1 matching problem; face recognition addresses a harder 1:K matching problem. 
+- The triplet loss is an effective loss function for training a neural network to learn an encoding of a face image.
+- The same encoding can be used for verification and recognition. Measuring distances between two images' encodings allows you to determine whether they are pictures of the same person. 
+***
+### References:
+
+- Florian Schroff, Dmitry Kalenichenko, James Philbin (2015). [FaceNet: A Unified Embedding for Face Recognition and Clustering](https://arxiv.org/pdf/1503.03832.pdf)
+- Yaniv Taigman, Ming Yang, Marc'Aurelio Ranzato, Lior Wolf (2014). [DeepFace: Closing the gap to human-level performance in face verification](https://research.fb.com/wp-content/uploads/2016/11/deepface-closing-the-gap-to-human-level-performance-in-face-verification.pdf) 
+- The pretrained model we use is inspired by Victor Sy Wang's implementation and was loaded using his code: https://github.com/iwantooxxoox/Keras-OpenFace.
+- Our implementation also took a lot of inspiration from the official FaceNet github repository: https://github.com/davidsandberg/facenet 
